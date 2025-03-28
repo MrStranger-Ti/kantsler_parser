@@ -34,21 +34,24 @@ logging.basicConfig(
     format="[%(levelname)s | %(asctime)s | %(module)s:%(lineno)s] %(message)s",
 )
 
+log = logging.getLogger(__name__)
+
 
 # Parsing
 
 
-def get_brands() -> list[str]:
+def get_brands() -> set[str]:
     if os.path.exists(BRANDS_FILE_PATH):
         with open(BRANDS_FILE_PATH, "r", encoding="utf-8") as file:
             brands = file.read().strip()
-            return brands.split("\n")
+            return set(brands.split("\n"))
 
     raise FileNotFoundError(f"Brand file not found: {BRANDS_FILE_PATH}")
 
 
 URL = _config.get("required", "URL")
 if not URL:
+    log.error("No URL. Set URL option in config.ini")
     raise ValueError("URL option is required")
 
 BRANDS_FILE_PATH = BASE_DIR / "brands.txt"

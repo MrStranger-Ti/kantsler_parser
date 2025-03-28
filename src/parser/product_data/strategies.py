@@ -39,9 +39,9 @@ class BrandStrategy(XMLProductDataStrategy):
         trans_table = str.maketrans("", "", string.punctuation)
         cleared_text = name.translate(trans_table)
 
-        for brand in config.BRANDS:
-            if brand and re.search(rf"\s+{brand}\s+", cleared_text):
-                return brand
+        for word in cleared_text.split():
+            if word in config.BRANDS:
+                return word
 
         return self.NONAME_VALUE
 
@@ -60,25 +60,31 @@ class ProductCharacteristics:
     GUARANTEE_ASSOCIATIONS = ["Гарантия"]
 
     def __init__(self, text: str, default_value: str = "") -> None:
-        soup = bs4.BeautifulSoup(text, "lxml")
-
-        self.text: str = str(soup.select_one("ul, ol"))
         self.default_value: str = default_value
         self.dict: dict[str, str] = {}
 
+        soup = bs4.BeautifulSoup(text, "lxml")
         for item in soup.select("ul > li, ol > li"):
             if ": " in item.text:
                 name, value = item.text.split(": ", maxsplit=1)
                 cleared_name = name.split()[0].lower()
-                self.dict[cleared_name] = value.strip()
+                self.dict[cleared_name] = value.strip(" .")
 
-    def get(self, names: list[str]) -> str:
-        for name in names:
+    def __str__(self) -> str:
+        return self.text
+
+    def get(self, associations: list[str]) -> str:
+        for name in associations:
             characteristic = self.dict.get(name.lower(), self.default_value)
             if characteristic:
                 break
 
         return characteristic or self.default_value
+
+    @property
+    def text(self) -> str:
+        rows = [f"{name}|{value};" for name, value in self.dict.items()]
+        return "\n".join(rows)
 
     @property
     def weight(self) -> str:
@@ -87,19 +93,6 @@ class ProductCharacteristics:
     @property
     def guarantee(self) -> str:
         return self.get(self.GUARANTEE_ASSOCIATIONS)
-
-    # @property
-    # def dimensions(self) -> tuple[str, str, str]:
-    #     """
-    #     Получение длины, ширины и высоты.
-    #     """
-    #
-    #     dimensions_text = self.get("Размер в упаковке")
-    #     match = re.fullmatch(r"(\d+\.\d+)x(\d+\.\d+)x(\d+\.\d+).*", dimensions_text)
-    #     dimensions = (
-    #         (match.group(1), match.group(2), match.group(3)) if match else ("", "", "")
-    #     )
-    #     return dimensions
 
 
 class CharacteristicStrategy(XMLProductDataStrategy):

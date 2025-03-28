@@ -66,7 +66,7 @@ class KantslerParser(XMLParser):
                 characteristics_text = characteristics.text
 
                 unit_measurement = "Шт"
-                available = "false"
+                available = False
                 vat = "20"
 
                 offers_rows.append(
