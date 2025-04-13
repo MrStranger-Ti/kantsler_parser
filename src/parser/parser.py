@@ -4,6 +4,7 @@ from lxml import etree
 
 from tqdm import tqdm
 
+from src.excel.column import Column
 from src.parser.abstract import XMLParser
 from src.parser.product_data.context import XMLProductContext
 from src.parser.product_data.strategies import (
@@ -12,6 +13,7 @@ from src.parser.product_data.strategies import (
     BrandStrategy,
     CharacteristicStrategy,
     CategoryStrategy,
+    MinOrderStrategy,
 )
 from src.utils.tqdm import PRODUCTS_PARSING_CONFIG
 
@@ -19,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 class KantslerParser(XMLParser):
-    def _parse(self, xml: bytes) -> list[list[str]]:
+    def _parse(self, xml: bytes) -> list[dict[str, str]]:
         categories = {}
         offers_rows = []
 
@@ -65,27 +67,31 @@ class KantslerParser(XMLParser):
                 guarantee = characteristics.guarantee
                 characteristics_text = characteristics.text
 
+                context.strategy = MinOrderStrategy(element=element)
+                min_order = context.get_data(child_name="sales_notes")
+
                 unit_measurement = "Шт"
                 available = "под заказ"
                 vat = "20"
 
                 offers_rows.append(
-                    [
-                        sku,
-                        name,
-                        brand,
-                        description,
-                        url,
-                        price,
-                        vat,
-                        category,
-                        img_url,
-                        guarantee,
-                        characteristics_text,
-                        unit_measurement,
-                        available,
-                        weight,
-                    ],
+                    {
+                        "sku": sku,
+                        "name": name,
+                        "brand": brand,
+                        "description": description,
+                        "url": url,
+                        "price": price,
+                        "vat": vat,
+                        "category": category,
+                        "img_url": img_url,
+                        "guarantee": guarantee,
+                        "characteristics_text": characteristics_text,
+                        "unit_measurement": unit_measurement,
+                        "available": available,
+                        "min_order": min_order,
+                        "weight": weight,
+                    },
                 )
 
                 element.clear()

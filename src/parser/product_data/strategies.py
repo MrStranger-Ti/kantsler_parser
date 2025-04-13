@@ -27,6 +27,13 @@ class ChildElementTextStrategy(XMLProductDataStrategy):
             return cleared_text
 
 
+class MinOrderStrategy(ChildElementTextStrategy):
+    def get_product_data(self, child_name: str) -> str:
+        text = super().get_product_data(child_name)
+        match = re.fullmatch(r"Мин партия (\d+) шт.", text)
+        return match.group(1) if match else ""
+
+
 class AttributeElementStrategy(XMLProductDataStrategy):
     def get_product_data(self, attr_name: str) -> str:
         return self.element.get(attr_name, "")
@@ -88,7 +95,17 @@ class ProductCharacteristics:
 
     @property
     def weight(self) -> str:
-        return self.get(self.WEIGHT_ASSOCIATIONS)
+        weight_text = self.get(self.WEIGHT_ASSOCIATIONS)
+        weight_match = re.fullmatch(r"([\d.,]+) (\w+)", weight_text)
+
+        if weight_match is None:
+            return weight_text
+
+        if weight_match.group(2) == "г":
+            grams = float(weight_match.group(1))
+            return str(round(grams / 1000, 3))
+
+        return weight_match.group(1)
 
     @property
     def guarantee(self) -> str:

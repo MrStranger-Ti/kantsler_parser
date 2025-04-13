@@ -63,6 +63,13 @@ NONAME_BRAND_VALUE = _config.get("optional", "NONAME_BRAND_VALUE") or "Noname"
 
 # Excel
 
+TEMPLATE_PATH = BASE_DIR / "templates/template.xlsx"
+
+if not os.path.exists(TEMPLATE_PATH):
+    msg = f"Path {TEMPLATE_PATH} does not exists."
+    log.error(msg)
+    raise FileNotFoundError(msg)
+
 RESULT_FILE_NAME = _config.get("optional", "RESULT_FILE_NAME") or "result.xlsx"
 
 RESULT_FILE_DIR = _config.get("optional", "RESULT_FILE_DIR")
@@ -74,24 +81,23 @@ RESULT_FILE_DIR = (
 
 SHEET_NAME = _config.get("optional", "SHEET_NAME") or "Ассортимент"
 
-COLS_NAMES = _config.get("optional", "COLS_NAMES")
-COLS_NAMES = (
-    COLS_NAMES.split(",")
-    if COLS_NAMES
-    else [
-        "SKU",
-        "Название товара",
-        "Бренд",
-        "Описание товара",
-        "Ссылка на товар",
-        "Цена",
-        "НДС",
-        "Категория",
-        "Изображение товара",
-        "Гарантия производителя",
-        "Характеристики",
-        "Единица измерения",
-        "Доступность",
-        "Вес с упаковкой",
-    ]
-)
+COLS = {
+    "sku": 2,
+    "name": 4,
+    "brand": 6,
+    "description": 8,
+    "url": 10,
+    "price": 11,
+    "vat": 16,
+    "category": 17,
+    "img_url": 19,
+    "guarantee": 21,
+    "characteristics_text": 23,
+    "unit_measurement": 24,
+    "available": 25,
+    "min_order": 27,
+    "weight": 34,
+}
+
+START_ROW = 5
+START_COL = 2

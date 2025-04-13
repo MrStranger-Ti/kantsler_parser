@@ -1,12 +1,14 @@
 from src import config
 from src.parser.parser import KantslerParser
-from src.utils.excel import insert_rows
+from src.excel.manager import ExcelManager
 
 
 def main() -> None:
     parser = KantslerParser(url=config.URL)
     rows = parser.get_data()
-    insert_rows(rows)
+
+    with ExcelManager(rows=rows) as manager:
+        manager.insert_rows()
 
 
 if __name__ == "__main__":
