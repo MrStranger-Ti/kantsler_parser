@@ -70,9 +70,8 @@ class ExcelManager:
     def insert_rows(self) -> None:
         log.info("Starting to prepare excel file")
 
-        sheet = self._get_sheet()
         for row_num, row in enumerate(
             tqdm(self.rows, **CREATING_EXCEL_CONFIG), start=config.START_ROW
         ):
             for col in row:
-                sheet.cell(row=row_num, column=col.num, value=col.data)
+                self._sheet.cell(row=row_num, column=col.num, value=col.data)
