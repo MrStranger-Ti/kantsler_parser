@@ -173,6 +173,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# other
+# others
 logs/
 *.xlsx
+!templates/*
