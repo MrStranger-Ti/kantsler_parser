@@ -1,15 +1,26 @@
-from src import config
-from src.parser.parser import KantslerParser
-from src.excel.manager import ExcelManager
+import sys
 
 
 def main() -> None:
-    parser = KantslerParser(url=config.URL)
-    rows = parser.get_data()
+    categories = get_categories()
+    products = get_products()
 
-    with ExcelManager(rows=rows) as manager:
-        manager.insert_rows()
+    manager = DataManager(
+        handlers=[
+            ExcelHandler(context={"categories": categories}),
+        ],
+    )
+    manager.manage(data=products)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        from src.api_service.requests import get_categories, get_products
+        from src.handling.excel.handler import ExcelHandler
+        from src.handling.manager import DataManager
+
+        main()
+    except Exception as exc:
+        print(f"Error: {exc}")
+        input("Press Enter to close console...")
+        sys.exit(1)
