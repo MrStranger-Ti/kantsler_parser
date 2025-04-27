@@ -177,4 +177,3 @@ cython_debug/
 logs/
 *.xlsx
 !templates/*
-prev_data/
