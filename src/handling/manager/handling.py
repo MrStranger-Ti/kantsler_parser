@@ -3,8 +3,8 @@ from typing import Any
 
 from typing_extensions import TypeVar
 
-from src.handling.base.formatter import Formatter
-from src.handling.base.mixins import ContextMixin
+from src.handling.manager.formatter import Formatter
+from src.handling.manager.mixins import ContextMixin
 
 T = TypeVar("T", bound=Formatter)
 

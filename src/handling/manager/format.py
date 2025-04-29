@@ -1,7 +1,7 @@
 import abc
 from typing import Any
 
-from src.handling.base.mixins import ContextMixin
+from src.handling.manager.mixins import ContextMixin
 
 
 class Formatter(ContextMixin, abc.ABC):
