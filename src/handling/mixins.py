@@ -4,7 +4,7 @@ from src import config
 from src.utils.system import get_json, save_json
 
 
-class ProductsHandlerMixin:
+class ProductsManagerMixin:
     products_ids_path = config.PREV_DATA_PATH / "products_ids.json"
 
     def save_products_ids(self, products: list[dict[str, Any]]) -> None:
@@ -25,9 +25,16 @@ class ProductsHandlerMixin:
         new_products = []
         for index, product in enumerate(products):
             product_id = product.get("sku")
-            if product_id in saved_products_ids:
+            if str(product_id) in saved_products_ids:
                 old_products.append(product)
             else:
                 new_products.append(product)
 
         return old_products + new_products
+
+    def filter_products_by_xml_ids(
+        self,
+        products: list[dict[str, Any]],
+        ids: set[int],
+    ) -> list[dict[str, Any]]:
+        return [product for product in products if product.get("sku") in ids]

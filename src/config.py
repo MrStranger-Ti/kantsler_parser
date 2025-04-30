@@ -7,6 +7,8 @@ import configparser
 
 # Main
 
+DEBUG = False
+
 if getattr(sys, "frozen", False):
     BASE_DIR = Path(sys.executable).parent
 else:
@@ -43,6 +45,11 @@ API_KEY = _config.get("required", "API_KEY")
 if not API_KEY:
     log.error("No API_KEY. Set API_KEY option in config.ini")
     raise ValueError("API_KEY option is required")
+
+XML_URL = _config.get("required", "XML_URL")
+if not XML_URL:
+    log.error("No XML_URL. Set XML_URL option in config.ini")
+    raise ValueError("XML_URL option is required")
 
 PRODUCTS_URL = "https://api.samsonopt.ru/v1/sku"
 

@@ -1,15 +1,6 @@
 from typing import Any
 
-from src.handling.base.formatter import Formatter
-
-
-def get_types_values(data: list[dict[str, str]], types: list[str]) -> dict[str, str]:
-    result = {}
-    for item in data:
-        if (package_type := item.get("type")) in types:
-            result.update({package_type: item.get("value")})
-
-    return result
+from src.handling.manager import Formatter
 
 
 class ConstantFieldsFormatter(Formatter):
@@ -75,37 +66,41 @@ class CategoryFormatter(Formatter):
     CATEGORY_FIELD = "category_list"
     FORMATTED_CATEGORY_FIELD = "category"
 
-    DEPTH_LEVEL_FIELD = "depth_level"
-    FILTER_VALUE = "1"
+    def find_category_by_id(self, category_id: str) -> dict[str, Any]:
+        categories = self.get_context("categories")
+        while len(categories) > 1:
+            left = categories[: len(categories) // 2]
+            right = categories[len(categories) // 2 :]
 
-    def filter_categories(
-        self,
-        categories: dict[str, list[dict[str, Any]]],
-    ) -> list[dict[str, Any]]:
-        return [
-            category
-            for category in categories.get("data") or []
-            if category.get(self.DEPTH_LEVEL_FIELD) == self.FILTER_VALUE
-        ]
+            compare_id = left[-1].get("id")
+            if compare_id is None:
+                return {}
+
+            if str(category_id) <= str(compare_id):
+                categories = left
+            else:
+                categories = right
+
+        return categories[0] if categories else {}
+
+    def find_root_category(self, category_id: str) -> dict[str, Any]:
+        category = self.find_category_by_id(category_id=category_id)
+        while category.get("parent_id"):
+            parent_category_id = str(category.get("parent_id"))
+            if parent_category_id:
+                category = self.find_category_by_id(category_id=parent_category_id)
+
+        return category
 
     def format(self, data: Any) -> dict[str, Any]:
-        formatted_data = {}
-
         category_list = data.get(self.CATEGORY_FIELD)
         if category_list is None:
-            return formatted_data
+            return {}
 
-        categories = self.get_context("categories")
-        filtered_categories = self.filter_categories(categories=categories)
-
-        for category in filtered_categories:
-            if category.get("id") in category_list:
-                formatted_data.update(
-                    {self.FORMATTED_CATEGORY_FIELD: category.get("name")}
-                )
-                break
-
-        return formatted_data
+        root_category = self.find_root_category(str(category_list[0]))
+        return {
+            self.FORMATTED_CATEGORY_FIELD: root_category.get("name", ""),
+        }
 
 
 class ImagesFormatter(Formatter):
@@ -148,43 +143,38 @@ class CharacteristicsFormatter(Formatter):
         return formatted_data
 
 
-class PackageFormatter(Formatter):
-    PACKAGE_FIELD = "package_list"
-    FORMATTED_PACKAGE_FIELDS = [
-        "unit",
-    ]
+class ListFieldFormatter(Formatter):
+    LIST_FIELD = None
+    FORMATTED_LIST_FIELDS = None
 
     def format(self, data: Any) -> dict[str, Any]:
         formatted_data = {}
 
-        package_list = data.get(self.PACKAGE_FIELD)
+        package_list = data.get(self.LIST_FIELD)
         if package_list is None:
             return formatted_data
 
-        fields = get_types_values(
-            data=package_list, types=self.FORMATTED_PACKAGE_FIELDS
-        )
+        fields = {}
+        for item in package_list:
+            if (package_type := item.get("type")) in self.FORMATTED_LIST_FIELDS or []:
+                fields.update({package_type: item.get("value")})
+
         formatted_data.update(fields)
 
         return formatted_data
 
 
-class SizesFormatter(Formatter):
-    SIZES_FIELD = "package_size"
-    FORMATTED_SIZES_FIELDS = [
+class PackageFormatter(ListFieldFormatter):
+    LIST_FIELD = "package_list"
+    FORMATTED_LIST_FIELDS = [
+        "unit",
+    ]
+
+
+class SizesFormatter(ListFieldFormatter):
+    LIST_FIELD = "package_size"
+    FORMATTED_LIST_FIELDS = [
         "height",
         "width",
         "depth",
     ]
-
-    def format(self, data: Any) -> dict[str, Any]:
-        formatted_data = {}
-
-        sizes = data.get(self.SIZES_FIELD)
-        if sizes is None:
-            return formatted_data
-
-        fields = get_types_values(data=sizes, types=self.FORMATTED_SIZES_FIELDS)
-        formatted_data.update(fields)
-
-        return formatted_data

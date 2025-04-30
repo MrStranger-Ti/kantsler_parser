@@ -24,7 +24,7 @@ class HttpClient:
             raise exc.__class__(msg)
 
         except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout) as exc:
-            msg = f"{str(exc)}. No response from the server in {config.TIMEOUT}."
+            msg = f"{str(exc)}. No response from the server in {config.TIMEOUT} sec."
             log.error(msg)
             raise exc.__class__(msg)
 

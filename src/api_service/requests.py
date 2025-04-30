@@ -41,7 +41,7 @@ def get_products() -> dict[str, list[dict[str, str]]]:
                 "pagination_count": config.PAGINATION_COUNT,
                 "pagination_page": page,
             },
-            timeout=10,
+            timeout=config.TIMEOUT,
         )
 
         page_products = data.get("data", [])
@@ -56,3 +56,14 @@ def get_products() -> dict[str, list[dict[str, str]]]:
             break
 
     return products
+
+
+def get_products_xml() -> bytes:
+    xml = client.get_data(
+        url=config.XML_URL,
+        params={
+            "User-Agent": ua.random,
+        },
+        timeout=config.TIMEOUT,
+    )
+    return xml

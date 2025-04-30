@@ -1,5 +1,4 @@
 import logging
-import time
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -10,8 +9,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from tqdm import tqdm
 
 from src import config
-from src.handling.base.handler import FormatHandler
-from src.handling.mixins import ProductsHandlerMixin
+from src.handling.manager import FormatHandler
 from src.utils.tqdm import (
     CREATING_EXCEL_CONFIG,
     FORMATTING_PRODUCTS_CONFIG,
@@ -28,7 +26,7 @@ class ExcelColumn:
         self.num = num
 
 
-class ExcelHandler(FormatHandler, ProductsHandlerMixin):
+class ExcelHandler(FormatHandler):
     formatters_classes = [
         formatters.ConstantFieldsFormatter,
         formatters.DefaultFieldsFormatter,
@@ -99,24 +97,19 @@ class ExcelHandler(FormatHandler, ProductsHandlerMixin):
             for item in items
         ]
 
-    def format(self, data: dict[str, list[dict[str, Any]]]) -> list[dict[str, str]]:
+    def format(self, data: list[dict[str, Any]]) -> list[dict[str, Any]]:
         log.info("Starting to format data.")
-        products = data.get("data")
 
         formatted_products = []
-        for product in tqdm(products or [], **FORMATTING_PRODUCTS_CONFIG):
+        for product in tqdm(data or [], **FORMATTING_PRODUCTS_CONFIG):
             formatted_item = self.process_formatters(data=product)
             if formatted_item:
                 formatted_products.append(formatted_item)
 
-        sorted_formatted_products = self.sort_products_by_oldest(
-            products=formatted_products
-        )
-
         log.info("Data has been formatted")
-        return sorted_formatted_products
+        return formatted_products
 
-    def handle(self, data: list[dict[str, str]]) -> None:
+    def handle(self, data: list[dict[str, Any]]) -> None:
         log.info("Starting to prepare excel file")
         rows = self.get_cols(items=data)
 
@@ -126,7 +119,5 @@ class ExcelHandler(FormatHandler, ProductsHandlerMixin):
             ):
                 for col in row:
                     self._sheet.cell(row=row_num, column=col.num, value=col.data)
-
-        self.save_products_ids(products=data)
 
         log.info("Excel file has been created")
