@@ -7,8 +7,6 @@ import configparser
 
 # Main
 
-DEBUG = False
-
 if getattr(sys, "frozen", False):
     BASE_DIR = Path(sys.executable).parent
 else:
