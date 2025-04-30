@@ -107,6 +107,7 @@ COLS = {
     "category": 17,
     "images": 19,
     "guarantee": 21,
+    "manufacturer": 22,
     "characteristics_text": 23,
     "unit": 24,
     "available": 25,

@@ -18,6 +18,7 @@ class DefaultFieldsFormatter(Formatter):
         "brand",
         "vendor_code",
         "description",
+        "manufacturer",
         "nds",
         "weight",
     ]
@@ -44,7 +45,7 @@ class SKUFormatter(Formatter):
 
 class PriceFormatter(Formatter):
     PRICE_FIELD = "price_list"
-    TYPES = ["infiltration", "contract"]
+    TYPES = ["infiltration"]
     FORMATTED_PRICE_FIELD = "price"
 
     def format(self, data: Any) -> dict[str, Any]:
